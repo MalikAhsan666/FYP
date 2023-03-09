@@ -57,7 +57,7 @@ const Electrician = ({ navigation }) => {
                         <TouchableOpacity 
                         style={[styles.card, styles.elevation,{marginTop:10, alignItems:'center'}]}
                         onPress={()=>{
-                            navigation.navigate('GigsDescription',{title: item.title,
+                            navigation.navigate('GigsDescription',{category: 'Electrician', title: item.title, emailId: item.id, 
                            desc: item.desc, price:item.price,
                            firstName:item.firstName, lastName:item.lastName, ordersCompleted:item.ordersCompleted,
                            rating:item.rating, phone:item.phone, country:item.country, city:item.city,
