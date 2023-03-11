@@ -10,14 +10,15 @@ import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
 const SpNotifications = (props) => {
     const [notf, setNotf] = useState([]);
-    const[clientId, setClientId]=useState('');
     const isFocused = useIsFocused();
+    const [clientId, setClientId]=useState('');
+    const [category, setCategory]=useState('');
 
 
     const cancelHiring = async()=>{
-        setDoc(doc(db, 'clientNotifications', auth.currentUser.email),{
+        setDoc(doc(db, 'clientNotifications', clientId),{
             status:'cancel',
-            cId: clientId
+            spId: auth.currentUser.email
         });
         const docRef = doc(db, 'spNotifications', clientId);
         await deleteDoc(docRef);
@@ -25,10 +26,15 @@ const SpNotifications = (props) => {
     }
 
     const acceptHiring = async()=>{
-        setDoc(doc(db, 'clientNotifications', auth.currentUser.email),{
+        setDoc(doc(db, 'clientNotifications', clientId),{
             status:'accept',
-            cId: clientId
-        })
+            spId: auth.currentUser.email
+        });
+       setDoc(doc(db, 'spPendingOrders', clientId),{
+        spId: auth.currentUser.email,
+        cId: clientId,
+        category:category
+       })
     }
 
     const getNotificaions = async () => {
@@ -38,7 +44,6 @@ const SpNotifications = (props) => {
         const querySnapshot = await getDocs(q);
         querySnapshot.forEach((doc) => {
             arr.push(doc.data())
-            setClientId(doc.data().cId)
             setNotf(arr)
         })
     }
@@ -65,7 +70,13 @@ const SpNotifications = (props) => {
                                     onPress: () => {cancelHiring()},
                                     style: "cancel"
                                 },
-                                { text: "Accept", onPress: () => {acceptHiring()} }
+                                { text: "Accept", onPress: () => {
+                                    setClientId(item.cId);
+                                     setClientId(item.cId); 
+                                     setCategory(item.category);
+                                     setCategory(item.category);
+                                     setCategory(item.category);
+                                     acceptHiring()} }
                             ]
                         );
                     }}>

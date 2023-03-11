@@ -11,6 +11,7 @@ import { async } from '@firebase/util';
 
 
 
+
 const wait = (timeout) => {
   return new Promise(resolve => setTimeout(resolve, timeout));
 }
@@ -182,6 +183,18 @@ const SpProfile = ({ navigation, route }, props) => {
               </View>
             </TouchableRipple>
           </View>
+
+              <View style={styles.menuWrapper}>
+                <TouchableRipple onPress={()=>{navigation.navigate('Orders')}} >
+                  <View style={styles.menuItem}>
+                  <Icon name="cart" color="#2196F3" size={25} />
+                  <Text style={styles.menuItemText}>Orders</Text>
+                  </View>
+                
+                </TouchableRipple>
+              </View>
+              
+
           <View style={styles.menuWrapper}>
             <TouchableRipple onPress={() =>{logOut()}}>
               <View style={styles.menuItem}>
