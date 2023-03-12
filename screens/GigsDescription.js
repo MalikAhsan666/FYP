@@ -1,20 +1,21 @@
 import { View, Text, TouchableOpacity, StyleSheet, Image, ScrollView, Alert } from 'react-native'
-import React from 'react';
+import React, { useState } from 'react';
 import { Avatar } from 'react-native-paper';
 import { styles } from '../StyleSheet/Styles';
 import { auth } from '../firebase/config';
-import { setDoc, doc } from 'firebase/firestore';
+import { setDoc, doc, arrayUnion } from 'firebase/firestore';
 import { db } from '../firebase/config';
 
 
 const GigsDescription = ({ route, navigation }) => {
-
+    const [category, setCategory]=useState(route.params.category);
+    
     const Hire = async () => {
-        await setDoc(doc(db, "spNotifications", auth.currentUser.email), {
-            spId: route.params.emailId,
-            cId: auth.currentUser.email,
-            category: route.params.category
-        });
+        await setDoc(doc(db, "spNotifications", route.params.emailId), {
+            
+                requests:arrayUnion({category:category,id: auth.currentUser.email})
+            
+        },{merge:true});
 
         Alert.alert(
             "Your request has been sent successfully!",

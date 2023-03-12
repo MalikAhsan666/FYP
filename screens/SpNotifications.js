@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react
 import React, { useEffect, useState } from 'react';
 import { styles } from '../StyleSheet/Styles';
 import { async } from '@firebase/util';
-import { doc, setDoc, query, where, getDoc, collection, onSnapshot, getDocs, updateDoc, deleteDoc } from "firebase/firestore";
+import { doc, setDoc, arrayUnion, query, where, getDoc, collection, onSnapshot, getDocs, updateDoc, deleteDoc, DocumentSnapshot, increment } from "firebase/firestore";
 import { db, auth } from '../firebase/config';
 import { useIsFocused } from "@react-navigation/native";
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
@@ -17,35 +17,36 @@ const SpNotifications = (props) => {
 
     const cancelHiring = async()=>{
         setDoc(doc(db, 'clientNotifications', clientId),{
-            status:'cancel',
-            spId: auth.currentUser.email
-        });
-        const docRef = doc(db, 'spNotifications', clientId);
+           reply:arrayUnion({status:'cancel', spId:auth.currentUser.email}) 
+        },{merge:true});
+        const docRef = doc(db, 'spNotifications', auth.currentUser.email);
         await deleteDoc(docRef);
-        setNotf('')
+        setNotf('');
+
+        setDoc(doc(db, 'spCancelOrders', auth.currentUser.email),{
+            rejectedOrders:increment(1)
+        });
+
+
     }
 
     const acceptHiring = async()=>{
         setDoc(doc(db, 'clientNotifications', clientId),{
-            status:'accept',
-            spId: auth.currentUser.email
+            reply:arrayUnion({status: 'accept', spId: auth.currentUser.email})
         });
-       setDoc(doc(db, 'spPendingOrders', clientId),{
-        spId: auth.currentUser.email,
-        cId: clientId,
-        category:category
-       })
+        
+       setDoc(doc(db, 'spPendingOrders', auth.currentUser.email),{
+        pendingOrder: arrayUnion({cId: clientId, category:category}) 
+       }, {merge:true})
     }
 
     const getNotificaions = async () => {
-        const arr = [];
-        const collRef = collection(db, 'spNotifications');
-        const q = query(collRef, where('spId', '==', auth.currentUser.email));
-        const querySnapshot = await getDocs(q);
-        querySnapshot.forEach((doc) => {
-            arr.push(doc.data())
-            setNotf(arr)
-        })
+        let arr=[]
+        const docref= doc(db, 'spNotifications', auth.currentUser.email);
+        const docSnap = await getDoc(docref);
+        docSnap.data()?.requests.map((doc)=>{arr.push({category:doc.category, id:doc.id})})
+        setNotf(arr)
+        
     }
 
     useEffect(() => {
@@ -71,8 +72,8 @@ const SpNotifications = (props) => {
                                     style: "cancel"
                                 },
                                 { text: "Accept", onPress: () => {
-                                    setClientId(item.cId);
-                                     setClientId(item.cId); 
+                                    setClientId(item.id);
+                                     setClientId(item.id); 
                                      setCategory(item.category);
                                      setCategory(item.category);
                                      setCategory(item.category);
@@ -83,6 +84,7 @@ const SpNotifications = (props) => {
                         <View style={styles.postsStyle}>
                             <View style={{ marginLeft: 10, marginTop: 17 }}>
                                 <Text style={[styles.postText, styles.postHeading]}>Hiring Request for {item.category}</Text>
+                                <Text>{item.id}</Text>
 
                             </View>
                         </View>
